@@ -1,8 +1,9 @@
-import csv
-from datetime import date
 from week import Week
 from dataset import Dataset
 
+
+def get_all_public_methods(obj: object) -> list[str]:
+    return [func for func in dir(obj) if callable(getattr(obj, func)) and not func.startswith("__")]
 
 
 def main() -> None:
