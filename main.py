@@ -7,6 +7,13 @@ def get_all_public_methods(obj: object) -> list[str]:
 
 
 def main() -> None:
+    '''
+    1) Ask user for file name
+    2) Create Dataset object with file name
+    3) Ask user for operation
+      3.5) Ask user for any additional variables required for operation
+    4) Perform operation
+    '''
     dataObj = Dataset('input/data.csv')
 
     print(get_all_public_methods(dataObj))
