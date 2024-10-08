@@ -24,7 +24,7 @@ class Week():
         self.num_weeks_sold = num_weeks_sold
         self.closing_stock = closing_stock
 
-    def getField(self, field: str) -> str | date | float | int:
+    def get_field(self, field: str) -> str | date | float | int:
         match field:
             case 'location': return self.location
             case 'date': return self.date

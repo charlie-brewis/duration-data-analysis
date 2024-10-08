@@ -21,26 +21,22 @@ class Dataset():
                 ),
             ]
         '''
-        self.data = self.import_csv(file_name)
-        self.data = self.sanitise(self.data)
+        self.data = self.__import_csv(file_name)
+        self.data = self.__sanitise(self.data)
 
-    def import_csv(self, file_name: str) -> list[list[str]]:
+    def __import_csv(self, file_name: str) -> list[list[str]]:
         with open(file_name, 'r') as file:
             reader = csv.reader(file)
             data = [week for week in reader]
         return data
     
-    def display(self) -> None:
-        for week in self.data:
-            print(week)
-    
-    def sanitise(self, data: list[list[str]]) -> list[list[str]]:
+    def __sanitise(self, data: list[list[str]]) -> list[list[str]]:
         data.pop(0) # Remove header
         new_data = []
         for row in data:
             new_week = Week(
                 location= row[1],
-                date= self._convert_date(row[2]),
+                date= self.__convert_date(row[2]),
                 gross_retail_sales= float(row[3].removeprefix('Â£')) if row[3] != '' else 0,
                 net_retail_sales= float(row[4].removeprefix('Â£')) if row[3] != '' else 0,
                 num_stores_selling= int(row[5]) if row[5] != '' else 0,
@@ -53,14 +49,14 @@ class Dataset():
             new_data.append(new_week)
         return new_data
 
-    def _convert_date(self, date_str: str) -> date:
+    def __convert_date(self, date_str: str) -> date:
         split_date = date_str.split(' ')
         year = int(split_date[3])
-        month = self._convert_month(split_date[2])
+        month = self.__convert_month(split_date[2])
         day = int(split_date[1])
         return date(year, month, day)
 
-    def _convert_month(self, month: str) -> int:
+    def __convert_month(self, month: str) -> int:
         match month:
             case 'Jan': return 1
             case 'Feb': return 2
@@ -74,10 +70,9 @@ class Dataset():
             case 'Oct': return 10
             case 'Nov': return 11
             case 'Dec': return 12
+    
 
-
-
-    def construct_location_dict(self) -> dict[str, list[Week]]:
+    def __construct_location_dict(self) -> dict[str, list[Week]]:
         '''
         location_dict: 
             {
@@ -87,19 +82,22 @@ class Dataset():
         '''
         location_dict = {}
         for week in self.data:
-            if week.location not in location_dict:
-                location_dict[week.location] = []
-            location_dict[week.location].append(week)
+            week_location = week.get_field('location')
+            if week_location not in location_dict:
+                location_dict[week_location] = []
+            location_dict[week_location].append(week)
         return location_dict
     
+    
+    # Public methods
     def avg_field_per_location(self, field: str, export_csv: bool = False) -> dict[str, float]:
-        location_dict = self.construct_location_dict()
+        location_dict = self.__construct_location_dict()
         average_field = {}
         for location, data in location_dict.items():
             # Calculate the total field for current location
             total_field = 0
             for week in data:
-                total_field += week.getField(field)
+                total_field += week.get_field(field)
             # Calculate the average field for current location
             average_field[location] = total_field / len(data)
         
@@ -110,7 +108,7 @@ class Dataset():
             return sorted_average_field
 
         # Export the data to a csv file
-        with open(f'average_{field}_per_location.csv', 'w') as file:
+        with open(f'output/average_{field}_per_location.csv', 'w') as file:
             writer = csv.writer(file)
             writer.writerow(['Location', f'Average {field}'])
             for location, avg in sorted_average_field.items():
@@ -118,6 +116,7 @@ class Dataset():
         
         return sorted_average_field
     
+
     def full_average_volume_sales(self) -> int:
         total_vol_sales = 0
         for week in self.data:
